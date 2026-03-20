@@ -4,6 +4,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from groq import Groq
 from ddgs import DDGS
+from tavily import TavilyClient
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.colors import HexColor
@@ -17,6 +18,14 @@ if not api_key:
     raise ValueError("GROQ_API_KEY not found in .env file!")
 
 client = Groq(api_key=api_key)
+
+SEARCH_PROVIDER = os.environ.get("SEARCH_PROVIDER", "ddgs").lower()
+
+if SEARCH_PROVIDER == "tavily":
+    tavily_api_key = os.environ.get("TAVILY_API_KEY")
+    if not tavily_api_key:
+        raise ValueError("TAVILY_API_KEY not found in .env file!")
+    tavily_client = TavilyClient(api_key=tavily_api_key)
 
 TOPICS = [
     "latest AI news 2026",
@@ -33,7 +42,25 @@ def divider():
     print("-" * 60)
 
 
-def search(topic):
+def search_tavily(topic):
+    print(f"  searching (tavily): {topic}")
+    try:
+        response = tavily_client.search(query=topic, max_results=5, search_depth="basic")
+        results = [r["content"] for r in response["results"]]
+        return "\n\n".join(results)
+    except Exception:
+        print(f"  tavily search failed, retrying...")
+        time.sleep(5)
+        try:
+            response = tavily_client.search(query=topic, max_results=3, search_depth="basic")
+            results = [r["content"] for r in response["results"]]
+            return "\n\n".join(results)
+        except Exception:
+            print(f"  skipping '{topic}', couldn't reach search.\n")
+            return ""
+
+
+def search_ddgs(topic):
     print(f"  searching: {topic}")
     results = []
     try:
@@ -51,6 +78,12 @@ def search(topic):
             print(f"  skipping '{topic}', couldn't reach search.\n")
             return ""
     return "\n\n".join(results)
+
+
+def search(topic):
+    if SEARCH_PROVIDER == "tavily":
+        return search_tavily(topic)
+    return search_ddgs(topic)
 
 
 def make_pdf(topic, summary):
