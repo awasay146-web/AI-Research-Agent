@@ -1,19 +1,44 @@
-# 🤖 AI Research Agent
+# AI Research Agent
 
-An automated AI agent that searches the web and generates professional PDF research reports.
+A Python automation tool that researches topics from the web and saves the results as formatted PDF reports.
 
-## Features
-- 🌐 Live web search using DuckDuckGo
-- 🤖 AI summarization using Groq (Llama 3.1)
-- 📄 Professional PDF report generation
-- ⚡ Fully automated - no input needed
-- 🔒 Secure API key management
+I built this to automate the research process — instead of manually searching and summarizing topics, this agent does it automatically.
 
-## Built With
+## What it does
+
+- Searches the web for any topic using DuckDuckGo
+- Sends results to an AI model for summarization
+- Saves each summary as a clean PDF report
+- Runs fully automatically through a topics list
+
+## Tech used
+
 - Python
-- Groq AI API
+- Groq API (Llama 3.1)
 - DuckDuckGo Search
-- ReportLab PDF
+- ReportLab
 
-## Author
-Built by Abdul Wasay
+## Setup
+
+1. Clone the repo
+2. Install dependencies:
+```
+   pip install groq ddgs reportlab python-dotenv
+```
+3. Create a `.env` file:
+```
+   GROQ_API_KEY=your_key_here
+```
+4. Edit the `TOPICS` list in `agent.py`
+5. Run:
+```
+   python agent.py
+```
+
+## Output
+
+Each topic generates a PDF report saved in the project folder.
+
+---
+
+By Abdul Wasay
