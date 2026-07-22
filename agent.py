@@ -9,7 +9,6 @@ from datetime import datetime
 from dotenv import load_dotenv
 from groq import Groq
 from ddgs import DDGS
-from pytrends.request import TrendReq
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.colors import HexColor
@@ -40,12 +39,17 @@ def divider():
     print("-" * 60)
 
 
+import feedparser
+
 def get_trending_topics():
     print("  fetching trending topics from Google Trends...\n")
     try:
-        pytrends = TrendReq(hl='en-US', tz=300)
-        trending = pytrends.trending_searches(pn='pakistan')
-        topics = trending[0].tolist()[:10]
+        feed_url = "https://trends.google.com/trending/rss?geo=PK"
+        feed = feedparser.parse(feed_url)
+        topics = [entry.title for entry in feed.entries[:10]]
+
+        if not topics:
+            raise ValueError("No topics found in feed")
 
         print(f"  found {len(topics)} trending topics\n")
         print("  asking AI to pick best ones...\n")
